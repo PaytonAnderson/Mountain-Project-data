@@ -44,11 +44,13 @@ class TicksAccumulator:
 
     def _accumulate(self, obj):
         match obj:
-            case {'id': _, 'user': user}:
+            case {'id': _, 'user': {'id': uid}}:
                 print(obj)
-                self.ticks.append(RouteTick(self.route.id, user))
+                self.ticks.append(RouteTick(self.route.id, uid))
             case _:
                 pass
+
+        return obj
 
     def pprint(self):
         for tick in self.ticks:
