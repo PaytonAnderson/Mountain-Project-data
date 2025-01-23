@@ -6,16 +6,21 @@ relatively wild JSON responses into controlled dataclasses that are
 IDE-friendly.
 '''
 
-from datetime import datetime
+import re
 import requests
-from typing import Callable, List
+from datetime import datetime
+from typing import List
 
-from model import RouteRating, RouteTick
+from model import Route, RouteRating, RouteTick
 
 # Constants related to themountainproject's API
-TICK_DATE_FORMAT = '%b %d, %Y, %I:%M %p'
 MTN_PROJECT_API = 'https://www.mountainproject.com/api/v2'
+MTN_PROJECT_ROOT = 'https://www.mountainproject.com'
 PAGE_SIZE = 250
+
+# Constants related to how text is formatted in the API responses
+SITEMAP_ROUTE_PATTERN = re.compile(r'<loc>https://www.mountainproject.com/route/(\d+)/([^/]+)</loc>')
+TICK_DATE_FORMAT = '%b %d, %Y, %I:%M %p'
 
 
 def fetch_ratings(i: int, route_id: int) -> List[RouteRating]:
@@ -62,3 +67,17 @@ def fetch_ticks(i: int, route_id: int) -> List[RouteTick]:
                 pass
 
     return result
+
+
+def fetch_routes(i: int) -> List[Route]:
+    '''
+    Fetch the ith page of routes.
+    '''
+
+    page_request = requests.get('{}/sitemap-routes-{}.xml'
+                                .format(MTN_PROJECT_ROOT, i))
+
+    page_request.raise_for_status()
+    xml = page_request.text
+
+    return [Route(id, name) for id, name in SITEMAP_ROUTE_PATTERN.findall(xml)]
