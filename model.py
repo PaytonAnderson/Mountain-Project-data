@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 
 
 @dataclass
@@ -19,3 +20,5 @@ class RouteRating:
 class RouteTick:
     route_id: int
     user_id: int
+    text: str
+    date: datetime

@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import Callable, List
 
 import requests
 
