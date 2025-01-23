@@ -102,6 +102,8 @@ class RatingsAccumulator:
             case _:
                 pass
 
+        return obj
+
     def pprint(self):
         for rating in self.ratings:
             print(f'{rating.user_id} said {rating.ratings}')
