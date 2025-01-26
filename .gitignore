@@ -3,3 +3,5 @@ __pycache__/
 *.tgz
 .coverage
 *.bz2
+*.db
+*.bak

@@ -45,7 +45,13 @@ def handle_route(route: Route):
 
 def scrape():
     routes_accumulator = Acc(lambda i: fetcher.fetch_routes(i))
-    for route in routes_accumulator.generator():
+    for i, route in enumerate(routes_accumulator.generator()):
+        if i % 10 == 0:
+            print(f'[{i}]', file=sys.stderr)
+
+        if i > 3000:
+            break
+
         print(route, file=sys.stderr)
         handle_route(route)
 

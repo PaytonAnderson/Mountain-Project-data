@@ -61,7 +61,13 @@ def fetch_ticks(i: int, route_id: int) -> List[RouteTick]:
     for obj in data['data']:
         match obj:
             case {'date': datestring, 'text': text, 'user': {'id': uid}}:
-                parsed_date = datetime.strptime(datestring, TICK_DATE_FORMAT)
+                parsed_date = datetime(1970, 1, 1, 0, 0, 0)
+                try:
+                    parsed_date = datetime.strptime(
+                        datestring, TICK_DATE_FORMAT)
+                except:
+                    pass
+
                 result.append(RouteTick(route_id, uid, text, parsed_date))
             case _:
                 pass
