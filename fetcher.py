@@ -13,7 +13,10 @@ import sys
 from datetime import datetime
 from typing import Generator, List
 
-from model import Area, Route, RouteRating, RouteTick
+from model import Area, Route, RouteRating, RouteReview, RouteTick
+
+# Config constants
+MOCK_AREA_IDS = True
 
 # Constants related to themountainproject's API
 MTN_PROJECT_API = 'https://www.mountainproject.com/api/v2'
@@ -62,6 +65,30 @@ def fetch_ratings(i: int, route_id: int) -> List[RouteRating]:
                 result.append(RouteRating(route_id, uid, ratings))
             case _:
                 pass
+
+    return result
+
+
+def fetch_reviews(i: int, route_id: int) -> List[RouteReview]:
+    '''
+    Fetch the ith page of user reviews for some route.
+    '''
+
+    page_request = requests.get('{}/routes/{}/stars?per_page={}&page={}'
+                                .format(MTN_PROJECT_API, route_id, PAGE_SIZE,
+                                        i + 1))
+
+    page_request.raise_for_status()
+
+    data = page_request.json()
+    result = []
+    for obj in data['data']:
+        match obj:
+            case {'score': score, 'user': {'id': uid}}:
+                result.append(RouteReview(route_id, uid, score))
+            case other:
+                print(f'ERROR: invalid score object ' + str(other),
+                      file=sys.stderr)
 
     return result
 
@@ -159,6 +186,29 @@ def fetch_areas(i: int) -> Generator[Area, None, None]:
     return (area for area in areas if area is not None)
 
 
+def get_area_id_from_route_id(route_id: int, route_name: str) -> int:
+    def safe():
+        html_request = requests.get('{}/route/{}/{}'
+                            .format(MTN_PROJECT_ROOT, route_id, route_name))
+        html_request.raise_for_status()
+        html = html_request.text
+
+        hierarchy = AREA_HIERARCHY_PATTERN.findall(html)
+        assert len(hierarchy) == 2, 'No hierarchy found for route ' + route_id
+
+        match json.loads(hierarchy[1]):
+            case {'itemListElement': [*breadcrumbs]}:
+                breadcrumb = parse_breadcrumb(breadcrumbs[-1])
+                return breadcrumb
+
+    if MOCK_AREA_IDS is True:
+        return 0
+
+    result = safe_run(safe)
+
+    return result if result is not None else 0
+
+
 def fetch_routes(i: int) -> List[Route]:
     '''
     Fetch the ith page of routes.
@@ -170,7 +220,8 @@ def fetch_routes(i: int) -> List[Route]:
     page_request.raise_for_status()
     xml = page_request.text
 
-    return [Route(id, name) for id, name in SITEMAP_ROUTE_PATTERN.findall(xml)]
+    return [Route(id, name, get_area_id_from_route_id(id, name))
+            for id, name in SITEMAP_ROUTE_PATTERN.findall(xml)]
 
 
 def get_sitemap() -> str:
