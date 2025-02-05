@@ -143,6 +143,8 @@ def fetch_areas(i: int) -> Generator[Area, None, None]:
     Fetch the ith page of areas.
     '''
 
+    print(f'fetch_areas({i})', file=sys.stderr)
+
     page_request = requests.get('{}/sitemap-areas-{}.xml'
                                 .format(MTN_PROJECT_ROOT, i))
 
