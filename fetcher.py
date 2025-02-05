@@ -26,6 +26,7 @@ GENERIC_SITEMAP_URL_PATTERN = re.compile(r'<loc>(.*?)</loc>')
 GPS_PATTERN = re.compile(r'<td>GPS:</td>\s*<td>\s*(-?\d+\.\d+), (-?\d+\.\d+)')
 SITEMAP_AREA_PATTERN = re.compile(r'https://www.mountainproject.com/area/(\d+)/([^/<]+)')
 SITEMAP_ROUTE_PATTERN = re.compile(r'<loc>https://www.mountainproject.com/route/(\d+)/([^/]+)</loc>')
+SITEMAP_AREA_PAGE_PATTERN = re.compile(r'https://www.mountainproject.com/sitemap-pages-(\d+).xml')
 TICK_DATE_FORMAT = '%b %d, %Y, %I:%M %p'
 
 
@@ -170,6 +171,10 @@ def fetch_routes(i: int) -> List[Route]:
     xml = page_request.text
 
     return [Route(id, name) for id, name in SITEMAP_ROUTE_PATTERN.findall(xml)]
+
+
+def get_sitemap() -> str:
+    return requests.get('https://www.mountainproject.com/sitemap.xml').text
 
 
 if __name__ == '__main__':

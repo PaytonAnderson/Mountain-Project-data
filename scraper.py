@@ -1,10 +1,13 @@
 import json
 import sys
+from dataclasses import asdict
 from typing import Optional
 
 import fetcher
 from accumulator import Accumulator as Acc
 from model import Area, Route, RouteRating, RouteTick
+
+ITERATIVE_MILESTONE = 100
 
 
 def stringify_entity(entity) -> Optional[str]:
@@ -48,15 +51,23 @@ def handle_route(route: Route):
 
 
 def scrape():
+    sitemap = fetcher.get_sitemap()
+
+    # area_count = 0
+    # area_pages = fetcher.SITEMAP_AREA_PAGE_PATTERN.findall(sitemap)
+    # for area_page in area_pages:
+    #     for area in fetcher.fetch_areas(area_page):
+    #         if area_count % ITERATIVE_MILESTONE == 0:
+    #             print(f'areas[{area_count}]', file=sys.stderr)
+
+    #         print(json.dumps(asdict(area)))
+    #         area_count += 1
+
     routes_accumulator = Acc(lambda i: fetcher.fetch_routes(i))
     for i, route in enumerate(routes_accumulator.generator()):
-        if i % 10 == 0:
-            print(f'[{i}]', file=sys.stderr)
+        if i % 100 == 0:
+            print(f'routes[{i}]', file=sys.stderr)
 
-        if i > 3000:
-            break
-
-        print(route, file=sys.stderr)
         handle_route(route)
 
 

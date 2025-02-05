@@ -7,6 +7,7 @@ from typing import List
 class Route:
     id: int
     name: str
+    area_id: int
 
 
 @dataclass
@@ -22,6 +23,13 @@ class RouteTick:
     user_id: int
     text: str
     date: datetime
+
+
+@dataclass
+class RouteReview:
+    route_id: int
+    user_id: int
+    score: int
 
 
 @dataclass
