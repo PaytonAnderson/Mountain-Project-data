@@ -29,7 +29,7 @@ GENERIC_SITEMAP_URL_PATTERN = re.compile(r'<loc>(.*?)</loc>')
 GPS_PATTERN = re.compile(r'<td>GPS:</td>\s*<td>\s*(-?\d+\.\d+), (-?\d+\.\d+)')
 SITEMAP_AREA_PATTERN = re.compile(r'https://www.mountainproject.com/area/(\d+)/([^/<]+)')
 SITEMAP_ROUTE_PATTERN = re.compile(r'<loc>https://www.mountainproject.com/route/(\d+)/([^/]+)</loc>')
-SITEMAP_AREA_PAGE_PATTERN = re.compile(r'https://www.mountainproject.com/sitemap-pages-(\d+).xml')
+SITEMAP_AREA_PAGE_PATTERN = re.compile(r'https://www.mountainproject.com/sitemap-areas-(\d+).xml')
 TICK_DATE_FORMAT = '%b %d, %Y, %I:%M %p'
 
 

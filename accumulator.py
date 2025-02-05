@@ -19,7 +19,9 @@ faster.
 '''
 
 from dataclasses import dataclass
-from typing import Callable, List
+from typing import Callable, List, Optional
+
+from fetcher import safe_run
 
 
 @dataclass
@@ -34,13 +36,16 @@ class Accumulator:
             ith page of data. The first page is index 0.
     '''
 
-    zero_indexed_fetcher: Callable[[int], List]
+    zero_indexed_fetcher: Callable[[int], Optional[List]]
 
     def generator(self):
         i = 0
-        page = self.zero_indexed_fetcher(i)
+        safe_fetcher = lambda i: safe_run(lambda: self.zero_indexed_fetcher(i))
+        page = safe_fetcher(i)
+        page = page if page is not None else []
 
         while len(page) > 0:
             yield from page
             i += 1
-            page = self.zero_indexed_fetcher(i)
+            page = safe_fetcher(i)
+            page = page if page is not None else []
