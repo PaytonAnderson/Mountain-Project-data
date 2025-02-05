@@ -22,3 +22,17 @@ class RouteTick:
     user_id: int
     text: str
     date: datetime
+
+
+@dataclass
+class Area:
+    area_id: int
+    area_name: str
+    latitude: float
+    longitude: float
+    area_chain: List[int]
+    '''
+    Represents the hierarchy of the area. area_chain[0] is always equivalent to
+    area_id, and area_chain[-1] is always 0, to indicate the root area that is
+    not stored but recognized as a valid area.
+    '''

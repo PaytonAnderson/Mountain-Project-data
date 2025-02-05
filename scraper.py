@@ -1,12 +1,13 @@
 import json
 import sys
+from typing import Optional
 
 import fetcher
 from accumulator import Accumulator as Acc
-from model import Route, RouteRating, RouteTick
+from model import Area, Route, RouteRating, RouteTick
 
 
-def stringify_entity(entity) -> str:
+def stringify_entity(entity) -> Optional[str]:
     dictionary = None
     match entity:
         case Route(rid, rname):
@@ -21,13 +22,16 @@ def stringify_entity(entity) -> str:
                 'date': date.isoformat()
                 }
         case _:
-            raise ValueError('Unexpected entity %s' % str(entity))
+            print('ERROR: Unexpected entity %s' % str(entity), file=sys.stderr)
+            return None
 
     return json.dumps(dictionary)
 
 
 def print_entity(entity):
-    print(stringify_entity(entity))
+    stringified = stringify_entity(entity)
+    if stringified is not None:
+        print(stringify_entity(entity))
 
 
 def handle_route(route: Route):
