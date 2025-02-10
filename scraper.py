@@ -1,3 +1,44 @@
+'''
+Scrapes mountainproject.com and outputs data in the following format:
+
+area:
+{
+    "area_id": 0,
+    "area_name": "",
+    "latitude": -180.00000,
+    "longitude": -180.00000,
+    "area_chain": [0]
+}
+
+route:
+{
+    "routeId": "0",
+    "routeName": ""
+}
+
+rating:
+{
+    "routeId": "0",
+    "userId": 0,
+    "ratings": [""]
+}
+
+tick:
+{
+    "routeId": "0",
+    "userId": 0,
+    "text": "",
+    "date": "YYYY-MM-DDThh-mm-ss" (Date.isoformat())
+}
+
+review:
+{
+    "route_id": "0",
+    "user_id": 0,
+    "score": 0
+}
+'''
+
 import json
 import sys
 from dataclasses import asdict
