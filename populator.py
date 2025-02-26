@@ -41,17 +41,20 @@ FOREIGN KEY (route_id) REFERENCES routes (id)
 );
 '''
 
-import dateutil.parser
-import json
+import re
 import sqlite3
 import sys
 from collections import defaultdict
 from sqlite3 import Connection, Cursor
+from multiprocessing import Pool
 
 from typing import Generator, Union
 
+from fetcher import get_area_id_from_route_id
 from model import Area, Route, RouteRating, RouteReview, RouteTick
 from serializer import from_jsonl
+
+DEFAULT_DATABASE_FILE_NAME = 'databasev2.db'
 
 
 def connect(file_name: str) -> Connection:
@@ -78,8 +81,11 @@ def insert_entity(cursor: Cursor, item: Union[Route, RouteRating, RouteTick]):
                            [aid, aname, lat, long, chain[1]])
 
 
-if __name__ == '__main__':
-    file_name = 'mydatabase.db' if len(sys.argv) == 1 else sys.argv[1]
+def populate_db():
+    file_name = (DEFAULT_DATABASE_FILE_NAME
+                 if len(sys.argv) == 1
+                 else sys.argv[1])
+
     conn = connect(file_name)
     cursor = conn.cursor()
 
@@ -108,3 +114,58 @@ if __name__ == '__main__':
 
     conn.commit()
     conn.close()
+
+
+def print_route_with_area_id(row: int) -> None:
+    route_id, route_name = row
+    area_id = get_area_id_from_route_id(route_id, route_name, False)
+
+    print(route_id, area_id, flush=True)
+    print(route_id, area_id, file=sys.stderr)
+
+    return (route_id, area_id)
+
+
+def get_area_ids():
+    file_name = (DEFAULT_DATABASE_FILE_NAME
+                 if len(sys.argv) == 1
+                 else sys.argv[1])
+
+    conn = connect(file_name)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id, name FROM routes WHERE area_id = 0 OR area_id IS NULL;')
+    route_ids = cursor.fetchall()
+
+    with Pool(4) as pool:
+        pool.map(print_route_with_area_id, route_ids)
+
+
+def update_area_ids():
+    file_name = (DEFAULT_DATABASE_FILE_NAME
+                 if len(sys.argv) == 1
+                 else sys.argv[1])
+
+    conn = connect(file_name)
+    cursor = conn.cursor()
+
+    pattern = re.compile(r'(\d+) (\d+)')
+    stdin = sys.stdin.read()
+    pairs = pattern.findall(stdin)
+
+    i = 0
+    for rid, aid in [map(int, x) for x in pairs]:
+        print(rid, aid)
+        cursor.execute('UPDATE routes SET area_id = ? WHERE id = ?',
+                       [aid, rid])
+
+        i += 1
+
+        if i % 1_000 == 0:
+            print(i)
+            conn.commit()
+
+
+if __name__ == '__main__':
+    # get_area_ids()
+    update_area_ids()

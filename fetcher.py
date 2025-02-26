@@ -15,9 +15,6 @@ from typing import Generator, List
 
 from model import Area, Route, RouteRating, RouteReview, RouteTick
 
-# Config constants
-MOCK_AREA_IDS = True
-
 # Constants related to themountainproject's API
 MTN_PROJECT_API = 'https://www.mountainproject.com/api/v2'
 MTN_PROJECT_ROOT = 'https://www.mountainproject.com'
@@ -186,7 +183,8 @@ def fetch_areas(i: int) -> Generator[Area, None, None]:
     return (area for area in areas if area is not None)
 
 
-def get_area_id_from_route_id(route_id: int, route_name: str) -> int:
+def get_area_id_from_route_id(
+  route_id: int, route_name: str, mock_ids: bool = True) -> int:
     def safe():
         html_request = requests.get('{}/route/{}/{}'
                             .format(MTN_PROJECT_ROOT, route_id, route_name))
@@ -201,7 +199,7 @@ def get_area_id_from_route_id(route_id: int, route_name: str) -> int:
                 breadcrumb = parse_breadcrumb(breadcrumbs[-1])
                 return breadcrumb
 
-    if MOCK_AREA_IDS is True:
+    if mock_ids is True:
         return 0
 
     result = safe_run(safe)
