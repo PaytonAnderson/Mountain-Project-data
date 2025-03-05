@@ -5,3 +5,4 @@ __pycache__/
 *.bz2
 *.db
 *.bak
+*.sql
