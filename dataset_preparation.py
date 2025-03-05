@@ -82,6 +82,3 @@ def execute_handler_chain(chain: Iterable[SqlDumpLineHandler], line: str):
 if __name__ == '__main__':
     for line in sys.stdin:
         execute_handler_chain(HANDLER_CHAIN, line)
-
-    for handler in HANDLER_CHAIN:
-        print(handler, file=sys.stderr)
