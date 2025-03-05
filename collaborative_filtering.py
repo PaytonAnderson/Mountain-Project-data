@@ -9,18 +9,42 @@ Think:
     recommendation interface
 '''
 
+from functools import cache
+
 import sqlite3
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
 
+def fetcher(conn):
+    @cache
+    def cached_fetcher(sql):
+        reviews_df = pd.read_sql_query(sql, conn)
+        return reviews_df.pivot_table(
+            index='user_id', 
+            columns='route_id', 
+            values='score',
+            fill_value=0
+        )
+
+    return cached_fetcher
+
+
 def get_recommendations(user_id, db_path, n_recommendations=300, similarity_threshold=0.3):
     # Connect to database
     conn = sqlite3.connect(db_path)
 
+    # fetch = fetcher(conn)
+
     # Load reviews data
-    query = 'SELECT user_id, route_id, score FROM reviews LIMIT 5000;'
+    query = 'SELECT user_id, route_id, score FROM reviews LIMIT 50000;'
+
+#     query = '''SELECT neighbor.route_id, neighbor.user_id, neighbor.score FROM reviews user
+# JOIN reviews neighbor
+# ON user.route_id = neighbor.route_id
+# WHERE user.user_id = 112156524
+# LIMIT 5000;'''
     reviews_df = pd.read_sql_query(query, conn)
 
     # Create a user-item matrix
@@ -30,6 +54,8 @@ def get_recommendations(user_id, db_path, n_recommendations=300, similarity_thre
         values='score',
         fill_value=0
     )
+
+    # user_route_matrix = fetch(query)
 
     # Get the target user's ratings
     if user_id not in user_route_matrix.index:
@@ -93,6 +119,10 @@ def get_recommendations(user_id, db_path, n_recommendations=300, similarity_thre
     return recommendations
 
 
+def get_recommendations_to_list(user_id, db_path):
+    return get_recommendations(user_id, db_path)['route_id'].tolist()
+
+
 def main():
     db_path = 'databasev2.db'
     user_id = 201159510
@@ -108,4 +138,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    pass

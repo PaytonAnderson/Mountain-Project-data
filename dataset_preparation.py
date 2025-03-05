@@ -51,6 +51,10 @@ INSERT_INTO_OTHER = re.compile(r'^INSERT INTO (areas|ratings|ticks).*?;$')
 PRINT_STRIPPED: Callable[[str], None] = lambda x: print(x.strip())
 
 
+class RandomUserDropper:
+    pass
+
+
 def randomly_drop_lines(line: str):
     roll = random.random()
 
